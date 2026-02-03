@@ -3,7 +3,7 @@ parameters:
     type: string
   - name: env
     type: string
-    default: Dev
+    default: Sandbox
 
 steps:
   - task: Cache@2
