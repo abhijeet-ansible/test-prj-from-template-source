@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<sub-flow name="common-subflowSub_Flow" doc:id="5b4e0e69-22f3-4242-ad54-0c339146ffb9" >
+		<logger level="DEBUG" doc:name="Debug Flow Logger" doc:id="12d682be-6616-4589-9897-d09279533953" message='Application: #[app.name] | FlowName: #[flow.name] | x-transaction-id: #[vars.commonStandardVars."x-transaction-id"] | Message: Request received in Create Interaction Implementation flow | Method: POST | Uri: #[attributes.requestUri] | Payload: #[payload]' category="iem.custom.debug"/>
+	</sub-flow>
+</mule>

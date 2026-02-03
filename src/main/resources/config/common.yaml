@@ -1,0 +1,11 @@
+common:
+  app:
+    name: "test-prj-from-template-source"
+    basePath: "/api/v1/*"
+    
+error:
+  mq:
+    enable: "true"
+    destination: "test-queue"
+    config:
+      name: "Anypoint_MQ_Config"

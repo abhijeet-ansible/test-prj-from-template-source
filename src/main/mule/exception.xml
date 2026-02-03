@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:module-error-handler-plugin="http://www.mulesoft.org/schema/mule/module-error-handler-plugin"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/module-error-handler-plugin http://www.mulesoft.org/schema/mule/module-error-handler-plugin/current/mule-module-error-handler-plugin.xsd">
+	<error-handler name="api-error-handler" doc:id="df16b3a8-8e18-40c6-8a61-c4fe48c5bfed" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="afae1b5e-2396-4c8f-8b7f-fdde0a4d9245" >
+			<ee:transform doc:name="Transform Message" doc:id="0e3c82cb-55ca-4a3b-9db7-ea2ed7112256" >
+				<ee:message />
+				<ee:variables >
+					<ee:set-variable variableName="enablePublishing" ><![CDATA[%dw 2.0
+output application/json
+---
+Mule::p("error.mq.enable")]]></ee:set-variable>
+					<ee:set-variable variableName="publishToJMS" ><![CDATA[%dw 2.0
+output application/json
+---
+Mule::p("error.handler.publish.jms")]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<module-error-handler-plugin:process-error doc:name="Process Error" doc:id="fc583345-b884-4589-b1d5-8f4602d13185" enablePublish="#[vars.enablePublishing]" >
+				<module-error-handler-plugin:custom-errors ><![CDATA[#[${file::errors/customErrors.dwl}]]]></module-error-handler-plugin:custom-errors>
+			</module-error-handler-plugin:process-error>
+			<set-variable value="#[attributes.httpStatus]" doc:name="Set HTTP Status Code" doc:id="e3959f7d-dd72-465e-909f-a58239973cbe" variableName="httpStatus" />
+			<logger level="ERROR" doc:name="Log Error" doc:id="e73dedaf-b63d-4d11-9245-9c1073ba1265" message='#[%dw 2.0
+output application/json
+---
+{ 
+    timestamp: now(),
+    correlationId: vars.correlationId default "N/A",
+    code: attributes.httpStatus default "500", 
+    message: attributes.errorLog default "Error occurred",
+    errorType: (error.errorType.namespace default "MULE") ++ ":" ++ (error.errorType.identifier default "INTERNAL_SERVER_ERROR")
+}]' />
+		</on-error-continue>
+	</error-handler>
+</mule>

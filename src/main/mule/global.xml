@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd">
+    <configuration doc:name="Configuration" doc:id="6686ea3c-81e3-43b1-9efe-1efb54a0320a" defaultErrorHandler-ref="api-error-handler" />
+    <!-- 1. Load property files -->
+    <configuration-properties doc:name="Configuration properties" doc:id="993e5d47-5b98-4c59-b197-7d12ad3ac0b1" file="config/common.yaml" />
+    <secure-properties:config name="Secureproperties" doc:name="Secure Properties Config" doc:id="37061aa7-62a1-49b5-aac8-84a248b503d9" file="config/test-prj-from-template-source-${mule.env}-config.yaml" key="${secure.key}" />
+    <!-- 2. TLS Context -->
+    <tls:context name="Listener_TLS_Context" doc:name="TLS Context" doc:id="7c992b6a-504b-44c7-ad28-1819d6039ab6">
+        <tls:key-store type="jks" path="${environment.listener.jksPath}" keyPassword="${secure::environment.listener.jksKeyPwd}" password="${secure::environment.listener.jksPwd}" />
+    </tls:context>
+    <!-- 3. HTTP Listener Config -->
+    <http:listener-config name="Eapi_listener">
+        <http:listener-connection host="${application.api.host}" port="${application.api.httpsPort}" protocol="HTTPS" tlsContext="Listener_TLS_Context" readTimeout="${environment.listener.readTimeout}" />
+    </http:listener-config>
+    <apikit:config name="iem-sf-sapi-config" api="resource::3c16e716-601e-418f-bc17-ce28c6591a41:iem-sf-sapi:1.0.13:raml:zip:iem-sf-sapi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <anypoint-mq:config name="Anypoint_MQ_Config" doc:name="Anypoint MQ Config" doc:id="7f5e5664-f47e-435f-b584-5fa48b278a6c">
+        <anypoint-mq:connection url="https://mq-us-east-1.anypoint.mulesoft.com/api/v1/organizations/3c16e716-601e-418f-bc17-ce28c6591a41/environments/d22d158a-3776-456c-8e89-c8532b5273b6" clientId="7dc11b787dd24aaf8bd74fa0f88a5f38" clientSecret="565aD3AF4a954847944dC04C4BBd385c" />
+    </anypoint-mq:config>
+    <configuration-properties doc:name="Configuration properties" doc:id="b708b7d5-be09-4483-91eb-b5fa437f32cc" file="config/test-prj-from-template-source-${mule.env}-config.yaml" />
+</mule>

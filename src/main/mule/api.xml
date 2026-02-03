@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+    <flow name="api-main">
+        <http:listener config-ref="Eapi_listener" path="${common.app.basePath}">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[%dw 2.0
+output application/java
+---
+(vars.outboundHeaders default {}) ++ {
+	"x-transaction-id": vars.commonStandardVars.'x-transaction-id' default uuid(),
+	 "end-timestamp": now() as String {format: "hh:mm:ss.SSSS"}
+}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+            </http:error-response>
+        </http:listener>
+        <ee:transform doc:name="Common Vars Initiator" doc:id="08d00a71-8f44-4fff-8e23-b83f23327de7">
+            <ee:message />
+            <ee:variables>
+                <ee:set-variable variableName="latency"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	requestEnteredClock: now() as Time  {format: "hh:mm:ss.SSSS"}
+} as Object { class: "java.util.HashMap" }]]></ee:set-variable>
+                <ee:set-variable variableName="commonStandardVars"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"x-correlation-id": correlationId,
+	"x-transaction-id": attributes.headers."x-transaction-id" default correlationId,
+	node: p('common.app.name'),
+	environment: p('mule.env') default "dev",
+	method: attributes.method,
+	uri: attributes.requestUri
+} as Object { class: "java.util.HashMap" }]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <apikit:router doc:name="APIkit Router" doc:id="0eb4e70b-8d14-494b-8cee-67018077a2c2" config-ref="iem-sf-sapi-config" />
+    </flow>
+    <flow name="get:\health:iem-sf-sapi-config" doc:id="1717fbda-b5b1-4780-85ac-3a914df957f2">
+        <ee:transform doc:name="Success Response builder" doc:id="5caaa22d-9394-4464-82e8-8a2bccc6d5cb">
+            <ee:message>
+                <ee:set-payload resource="dw/ping-response.dwl" />
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\customerDetails\(customerNumber):iem-sf-sapi-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="customerNumber">attributes.uriParams.'customerNumber'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[
+  {
+    hasMSA__c: "true",
+    Id: "001WB00000sFO1SYAW",
+    "type": "Account",
+    enforceableRightToPayment__c: "false"
+  }
+] as Array {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\msa\getFileData:iem-sf-sapi-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[
+  {
+    ContentDocument: {
+      FileType: "PDF",
+      LatestPublishedVersion: {
+        VersionData: "JVBERi0xLjUNJabpz8QNCjMyOSAwIG9iag08PC9MaW5lYXJpemVkIDEvTyAzMzI",
+        Id: "068WB000009XkwXYAS",
+        "type": "ContentVersion",
+        VersionNumber: "1"
+      },
+      FileExtension: "pdf",
+      Title: "Bechtel-Dispute Resolution EXHBIT A",
+      Id: null,
+      "type": "ContentDocument"
+    },
+    LinkedEntityId: "800WB00000HdXSBYA3",
+    Id: null,
+    "type": "ContentDocumentLink",
+    ContentDocumentId: "069WB000009QXb3YAG"
+  }
+] as Array {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\getProducts:iem-sf-sapi-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[
+  {
+    ProductCode: "F1000",
+    alternateUse__c: "N/A"
+  }
+] as Array {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\msa\(customerNumber):iem-sf-sapi-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="customerNumber">attributes.uriParams.'customerNumber'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[
+  {
+    Status: "Activated",
+    ContractNumber: "00000289",
+    ContentDocumentLinks: [
+      {
+        LinkedEntityId: "800WB00000HdXSBYA3",
+        Id: "feretrth",
+        "type": "ContentDocumentLink",
+        ContentDocumentId: "069WB000009QXb3YAG"
+      }
+    ],
+    AccountId: "001WB00000sFO1JYAW",
+    Id: "null",
+    Contract_Type__c: "MSA",
+    "type": "Contract"
+  }, 
+  {
+    Status: "Activated",
+    ContractNumber: "00000290",
+    ContentDocumentLinks: "null",
+    AccountId: "001WB00000sFO1JYAW",
+    Id: "800WB00000HdfRJYAZ",
+    Contract_Type__c: "MSA",
+    "type": "Contract"
+  }
+] as Array {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\files\upload:application\json:iem-sf-sapi-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: "File uploaded to Salesforce Successfully",
+  response: {
+    id: null,
+    items: [
+      {
+        exception: null,
+        message: null,
+        payload: {
+          success: true,
+          id: "068WB00000AS7iMYAT",
+          errors: []
+        },
+        id: "068WB00000AS7iMYAT",
+        statusCode: null,
+        successful: true
+      }
+    ],
+    successful: true
+  }
+} as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\revrec\(customerNumber)\log:application\json:iem-sf-sapi-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="customerNumber">attributes.uriParams.'customerNumber'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: "Salesforce Updated Successfully",
+  customerNumber: "RAV8347",
+  response: {
+    id: null,
+    items: [
+      {
+        exception: null,
+        message: null,
+        payload: {
+          created: false,
+          success: true,
+          id: "a1tWB00000B774rYAB",
+          errors: []
+        },
+        id: "a1tWB00000B774rYAB",
+        statusCode: null,
+        successful: true
+      }
+    ],
+    successful: true
+  }
+} as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+</mule>

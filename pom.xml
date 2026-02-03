@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<parent>
+		<groupId>3c16e716-601e-418f-bc17-ce28c6591a41</groupId>
+		<artifactId>iem-mule-parent-pom</artifactId>
+		<version>1.0.0</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>3c16e716-601e-418f-bc17-ce28c6591a41</groupId>
+	<artifactId>test-prj-from-template-source</artifactId>
+	<version>1.0.0</version>
+	<packaging>mule-application</packaging>
+	<name>test-prj-from-template-source</name>
+
+	<description>test-prj-from-template-source</description>
+	<properties>
+		<categories>[]</categories>
+		<fields>[]</fields>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.mule.tools.maven</groupId>
+				<artifactId>mule-maven-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<classifier>mule-application</classifier>
+				</configuration>
+			</plugin>
+			<!-- Standard Maven Deploy Plugin must NOT be skipped for Exchange publishing -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>false</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>3c16e716-601e-418f-bc17-ce28c6591a41</groupId>
+			<artifactId>iem-api-common-error-handler</artifactId>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>3c16e716-601e-418f-bc17-ce28c6591a41</groupId>
+			<artifactId>iem-sf-sapi</artifactId>
+			<version>1.0.13</version>
+			<classifier>raml</classifier>
+			<type>zip</type>
+		</dependency>
+	</dependencies>
+
+</project>

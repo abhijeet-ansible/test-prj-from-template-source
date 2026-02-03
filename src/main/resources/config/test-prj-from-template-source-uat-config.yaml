@@ -1,0 +1,16 @@
+application:
+  api:
+   id: "12345"
+   host: "0.0.0.0"
+   httpsPort: "8081"
+
+environment:  
+  listener: 
+    jksPath: "certs/nonprod-listener.jks"
+    jksPwd: "![TKx1NkZLwStKjSPMnLkGZA==]"
+    jksKeyPwd: "![TKx1NkZLwStKjSPMnLkGZA==]"
+    readTimeout: "30000"
+      
+    
+    
+    
