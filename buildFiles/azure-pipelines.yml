@@ -3,12 +3,6 @@
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
-resources:
-  repositories:
-    - repository: pipeline-plans
-      name: pipeline-plans
-      type: git
-      ref: main
 
 trigger:
   batch: true
@@ -40,9 +34,9 @@ stages:
   jobs:
   - job: Test
     steps:
-      - template: test-mule-app.yml@pipeline-plans
+      - template: test-mule-app.yml
         parameters:
-         artifactName: {{ artifact name }}
+         artifactName: test-prj-from-template-source
          env: Dev
     condition: and(succeeded(), eq(variables.isMain, false))
 
@@ -51,9 +45,9 @@ stages:
   jobs:
   - job: Build
     steps:
-      - template: build-mule-app.yml@pipeline-plans
+      - template: build-mule-app.yml
         parameters:
-          artifactName: {{ artifact name }}
+          artifactName: test-prj-from-template-source
     condition: and(succeeded(), eq(variables.isMain, false))
 
 - stage: Release
@@ -61,9 +55,9 @@ stages:
   jobs:
   - job: Release
     steps:
-      - template: create-release-tag.yml@pipeline-plans
+      - template: create-release-tag.yml
         parameters:
          gitUseremail: $BUILD_REQUESTEDFOREMAIL
          gitUsername: "$BUILD_REQUESTEDFOR"
-         artifactName: {{ artifact name }}
+         artifactName: test-prj-from-template-source
     condition: and(succeeded(), eq(variables.isMain, true))
