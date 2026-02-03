@@ -1,0 +1,27 @@
+{
+  "environment": "Dev",
+  "release": {
+    "strategy": "snapshot",
+    "autoDeploy": true,
+    "createGitTag": false
+  },
+  "application": {
+    "runtime": "4.10.2",
+    "replicas": 1,
+    "workers": {
+      "type": "MICRO",
+      "amount": 1
+    },
+    "region": "us-east-1"
+  },
+  "maven": {
+    "skipTests": false,
+    "skipMunitTests": false
+  },
+  "logging": {
+    "level": "DEBUG"
+  },
+  "notifications": {
+    "enabled": false
+  }
+}

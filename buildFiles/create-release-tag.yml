@@ -1,0 +1,22 @@
+parameters:
+  - name: gitUseremail
+    type: string
+  - name: gitUsername
+    type: string
+  - name: artifactName
+    type: string
+
+steps:
+  - checkout: self
+    persistCredentials: true
+
+  - script: |
+      VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+      echo "Project version: $VERSION"
+
+      git config user.email "${{ parameters.gitUseremail }}"
+      git config user.name "${{ parameters.gitUsername }}"
+
+      git tag -a "v$VERSION" -m "Release $VERSION - ${{ parameters.artifactName }}"
+      git push origin "v$VERSION"
+    displayName: Create and Push Git Tag

@@ -1,0 +1,26 @@
+parameters:
+  - name: artifactName
+    type: string
+  - name: env
+    type: string
+    default: Dev
+
+steps:
+  - task: Cache@2
+    inputs:
+      key: 'maven | "$(Agent.OS)" | pom.xml'
+      restoreKeys: |
+        maven | "$(Agent.OS)"
+      path: $(MAVEN_CACHE_FOLDER)
+
+  - task: Maven@3
+    displayName: Run MUnit Tests
+    inputs:
+      mavenPomFile: pom.xml
+      goals: test
+      options: >
+        -DskipMunitTests=false
+        -Dmule.env=${{ parameters.env }}
+      mavenOptions: $(MAVEN_OPTS)
+      publishJUnitResults: true
+      testResultsFiles: '**/surefire-reports/TEST-*.xml'
