@@ -26,7 +26,7 @@ pool:
     demands: maven
 
 variables:
-  - group: Anypoint Platform Variable
+  - group: Anypoint Platform Common - non prod
   - name: isMain
     value: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
   - name: MAVEN_CACHE_FOLDER
