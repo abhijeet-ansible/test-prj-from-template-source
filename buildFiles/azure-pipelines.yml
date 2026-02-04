@@ -37,7 +37,7 @@ stages:
       - template: test-mule-app.yml
         parameters:
          artifactName: test-prj-from-template-source
-         env: Dev
+         env: Sandbox
     condition: and(succeeded(), eq(variables.isMain, false))
 
 - stage: Build
